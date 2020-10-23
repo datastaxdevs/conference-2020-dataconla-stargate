@@ -5,15 +5,15 @@
 
 ![image](pics/splash.png?raw=true)
 
-# Table of content
+## Table of content
 
 1. [Prerequisites](#1-prerequisite-install-docker-and-docker-compose)
 2. [Start the Demo](#2-start-the-demo)
-3. [Use CQL API](#)
-3. [Use REST API](#)
-4. [Use Document API](#)
-5. [Use GraphQL API](#)
-6. [Create a Astra Instance](#)
+3. [Use CQL API](#3-use-cql-api)
+4. [Use REST API](#4-use-rest-api-swagger)
+5. [Use Document API](#5-use-document-api-swagger)
+6. [Use GraphQL API](#6-use-graphql-api-portal)
+7. [Create a Astra Instance](#7-start-the-database)
 
 ## 1. Prerequisite, Install docker and docker-compose ##
 
@@ -212,11 +212,12 @@ Expected output
 
 [🏠 Back to Table of Contents](#table-of-content)
 
-## 5. Use GraphQL API (portal)
+## 6. Use GraphQL API (portal)
 
 [🏠 Back to Table of Contents](#table-of-content)
 
-## 6. Start the database
+
+## 7. Start the database
 
 **✅ Create an free-forever Cassandra database with DataStax Astra**: [click here to get started](https://astra.datastax.com/register?utm_source=github&utm_medium=referral&utm_campaign=spring-petclinic-reactive) 🚀
 
