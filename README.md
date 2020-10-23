@@ -7,11 +7,8 @@
 
 # Table of content
 
-1. Prerequisite
-  a. Install Docker
-  b. Install Docker-compose
-  c. Clone the repository
-
+1. [Prerequisites](#1-prerequisite-install-docker-and-docker-compose)
+  
 2. Start the Demo
 
 3. Use CQL API
@@ -106,12 +103,118 @@ sudo chmod +x /usr/local/bin/docker-compose
 ```
 [🏠 Back to Table of Contents](#exercises)
 
+## 2. Start the demo
 
-**✅  Clone this repository** : [Gitpod](http://www.gitpod.io/?utm_source=datastax&utm_medium=referral&utm_campaign=datastaxworkshops) is an IDE 100% online based on Eclipse Theia. To initialize your environment simply click on the button below *(CTRL + Click to open in new tab)*
+**✅ Clone the repository** :
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/DataStax-Academy/Spring-boot-todo-app/)
+Download the repository as a zip [here] or clone with the following git command
 
-Target url looks like  `https://<your_uid>.<your_region>.gitpod.io/#/#/workspace/Spring-boot-todo-app`. These URL's are dynamic and we cannot provide clickable links in advance. 
+```
+git clone https://github.com/datastaxdevs/conference-2020-dataconla-stargate.git
+``` 
+
+**✅ Start all containers** :
+
+We provide a `docker-compose.yaml` file ready to go with a `Cassandra 3.11.8` backend and stargate in version `0.0.8`
+
+To start use the following
+
+```
+docker-compose up -d
+```
+
+**👁️ Expected output**
+
+```
+Starting backend-1 ... done
+Starting stargate  ... done
+Starting backend-2 ... done
+Starting backend-3 ... done
+```
+
+Wait for all services are up. You need the 4 containers. 
+
+You may have to relaunch the command multiple times as stargate need the 3 nodes to be up to join the cluster.
+
+```bash
+docker ps
+```
+
+**👁️ Expected output**
+
+```bash
+CONTAINER ID        IMAGE                             COMMAND                  CREATED             STATUS              PORTS                                                       NAMES
+237d9137884f        stargateio/stargate-3_11:v0.0.8   "./starctl"              25 hours ago        Up 4 hours          0.0.0.0:8080-8082->8080-8082/tcp, 0.0.0.0:9045->9042/tcp    stargate
+b3a10c48dccc        cassandra:3.11.8                  "docker-entrypoint.s…"   25 hours ago        Up 4 hours          7000-7001/tcp, 7199/tcp, 9042/tcp, 9160/tcp                 backend-3
+68be3b9bfc23        cassandra:3.11.8                  "docker-entrypoint.s…"   25 hours ago        Up 4 hours          7000-7001/tcp, 7199/tcp, 9042/tcp, 9160/tcp                 backend-2
+23b009a08872        cassandra:3.11.8                  "docker-entrypoint.s…"   25 hours ago        Up 4 hours          7000-7001/tcp, 7199/tcp, 9160/tcp, 0.0.0.0:9044->9042/tcp   backend-1
+```
+
+- You should be able to access the GRAPH QL PORTAL on [http://localhost:8080/playground](http://localhost:8080/playground)
+
+![image](pics/playground-home.png?raw=true)
+
+
+- You should be able to access the Swagger UI on [http://localhost:8082/swagger-ui/#/](http://localhost:8082/swagger-ui/#/)
+
+![image](pics/swagger-home.png?raw=true)
+
+
+
+## 3. DEMO !
+
+```
+docker exec -it `docker ps | grep backend-1 | cut -b 1-12` nodetool status
+```
+Expected output:
+
+```bash
+nodetool status
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address     Load       Tokens       Owns (effective)  Host ID                               Rack
+UN  172.20.0.4  179.98 KiB  8            1.1%              9873d76b-b439-4c81-92d7-4de103052af0  rack1
+UN  172.20.0.5  370.43 KiB  256          35.0%             52e259b8-92ee-402c-b3b2-b1b39ad10ebb  rack1
+UN  172.20.0.2  354.2 KiB  256          34.8%             9dc3b120-19a7-4eda-8828-83532d816fcc  rack1
+UN  172.20.0.3  341.41 KiB  256          29.1%             b385cbc3-7d30-46d3-bd14-f1b8ee01044d  rack1
+```
+
+Get Stargate IP
+```
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' stargate
+```
+
+```
+
+
+### 1. REST API
+
+- Generate an auth token
+
+```bash
+curl -L -X POST 'http://localhost:8081/v1/auth' \
+  -H 'Content-Type: application/json' \
+  --data-raw '{
+    "username": "cassandra",
+    "password": "cassandra"
+}'
+```
+
+Expected output 
+```
+{"authToken":"74be42ef-3431-4193-b1c1-cd8bd9f48132"}
+```
+
+- Using Swagger List keyspaces 
+
+
+
+
+
+
+
 ### 1. Start the database
 
 **✅ Create an free-forever Cassandra database with DataStax Astra**: [click here to get started](https://astra.datastax.com/register?utm_source=github&utm_medium=referral&utm_campaign=spring-petclinic-reactive) 🚀
