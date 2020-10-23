@@ -8,23 +8,18 @@
 # Table of content
 
 1. [Prerequisites](#1-prerequisite-install-docker-and-docker-compose)
-  
-2. Start the Demo
-
-3. Use CQL API
-
-3. Use REST API
-
-4. Use Document API
-
-5. Use GraphQL API
-
+2. [Start the Demo](#2-start-the-demo)
+3. [Use CQL API](#)
+3. [Use REST API](#)
+4. [Use Document API](#)
+5. [Use GraphQL API](#)
+6. [Create a Astra Instance](#)
 
 ## 1. Prerequisite, Install docker and docker-compose ##
 
 To run the demo you need `docker` and `docker-compose`. Skip this steps if you have them available already
 
-### 1. Install Docker
+### 1.1 Install Docker
 
 Docker is an open-source project that automates the deployment of software applications inside containers by providing an additional layer of abstraction and automation of OS-level virtualization on Linux.
 
@@ -84,7 +79,7 @@ docker -v
 ```
 [🏠 Back to Table of Contents](#Table-Of-content)
 
-### 2. Install Docker Compose
+### 1.2 Install Docker Compose
 
 Docker Compose is a tool for defining and running multi-container Docker applications. It uses YAML files to configure the application's services and performs the creation and start-up process of all the containers with a single command. The `docker-compose` CLI utility allows users to run commands on multiple containers at once, for example, building images, scaling containers, running containers that were stopped, and more. Please refer to [Reference Documentation](https://docs.docker.com/compose/install/) if you have for more detailed instructions.
 
@@ -101,7 +96,7 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-
 # Allow execution
 sudo chmod +x /usr/local/bin/docker-compose
 ```
-[🏠 Back to Table of Contents](#exercises)
+[🏠 Back to Table of Contents](#table-of-content)
 
 ## 2. Start the demo
 
@@ -159,9 +154,9 @@ b3a10c48dccc        cassandra:3.11.8                  "docker-entrypoint.s…"  
 
 ![image](pics/swagger-home.png?raw=true)
 
+[🏠 Back to Table of Contents](#table-of-content)
 
-
-## 3. DEMO !
+## 3. Use CQL API
 
 ```
 docker exec -it `docker ps | grep backend-1 | cut -b 1-12` nodetool status
@@ -186,10 +181,9 @@ Get Stargate IP
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' stargate
 ```
 
-```
+[🏠 Back to Table of Contents](#table-of-content)
 
-
-### 1. REST API
+## 4. Use REST API (swagger)
 
 - Generate an auth token
 
@@ -211,35 +205,42 @@ Expected output
 
 
 
+[🏠 Back to Table of Contents](#table-of-content)
+
+## 5. Use Document API (swagger)
 
 
+[🏠 Back to Table of Contents](#table-of-content)
 
+## 5. Use GraphQL API (portal)
 
-### 1. Start the database
+[🏠 Back to Table of Contents](#table-of-content)
+
+## 6. Start the database
 
 **✅ Create an free-forever Cassandra database with DataStax Astra**: [click here to get started](https://astra.datastax.com/register?utm_source=github&utm_medium=referral&utm_campaign=spring-petclinic-reactive) 🚀
 
 
-![Astra Registration Screen](doc/img/db-auth.png?raw=true)
+![Astra Registration Screen](pics/db-auth.png?raw=true)
 
 
 **✅ Use the form to create new database**
 
 On the Astra home page locate the **Add Database** button
 
-![Astra Database Creation Form](doc/img/db-creation-1.png?raw=true)
+![Astra Database Creation Form](pics/db-creation-1.png?raw=true)
 
 Select the **free tier** plan, this is a true free tier, free forever and no payment method asked 🎉 🎉
 
-![Astra Database Creation Form](doc/img/db-creation-2.png?raw=true)
+![Astra Database Creation Form](pics/db-creation-2.png?raw=true)
 
 Select the proper region and click the `configure` button. The number of regions and cloud providers are limited in the free tier but please notice you can run the DB on any cloud with any VPC Peering.
 
-![Astra Database Creation Form](doc/img/db-creation-3.png?raw=true)
+![Astra Database Creation Form](pics/db-creation-3.png?raw=true)
 
 Fill the `database name`, `keyspace name`, `username` and `password`. *Please remember your password as you will be asked to provide it when application start the first time.*
 
-![Astra Database Creation Form](doc/img/db-creation-4.png?raw=true)
+![Astra Database Creation Form](pics/db-creation-4.png?raw=true)
 
 **✅ View your Database and connect**
 
@@ -254,85 +255,6 @@ View your database. It may take 2-3 minutes for your database to spin up. You wi
 Once the database is ready, notice how the status changes from `pending` to `Active` and Astra enables the **connect** button.
 
 ![my-pic](https://github.com/datastaxdevs/shared-assets/blob/master/astra/dashboard-withdb-1000.png?raw=true)
-
-### 2. Copy credentials to connect
-
-**✅ Navigate to your credentials**
-
-Locate the combo `Organization: <Your email>` on the top navigation. On the right side of your organization, click the elipsis (...) then click your `<Your email>`.
-
-![my-pic](https://github.com/datastaxdevs/shared-assets/blob/master/astra/organization-combo-1000.png?raw=true)
-
-You should land to the following screen. Scroll down to the bottom of the page to locate the `Service Account` in `Security Settings`
-
-![my-pic](https://github.com/datastaxdevs/shared-assets/blob/master/astra/organization-home-1000.png?raw=true)
-
-**✅ Create Service Account**
-
-Create a service account by clicking `Add Service Account` button above the section as shown below
-
-![my-pic](https://github.com/datastaxdevs/shared-assets/blob/master/astra/security-settings-annotated.png?raw=true)
-
-When panel open on the right, click `Add` 
-
-![my-pic](https://github.com/datastaxdevs/shared-assets/blob/master/astra/security-add-org-annotated.png?raw=true)
-
-**✅ Copy credentials to your clipboard**
-
-Click the ellipsis at end of Service Account row to open menu as select `Copy Credentials`
-
-![my-pic](https://github.com/datastaxdevs/shared-assets/blob/master/astra/organization-copycredentials-1000.png?raw=true)
-
-The credentials you copied to the clipboard look like the following JSON, we will use it in gitpod to enable connectivity.
-```json
-{
-  "clientId":"149de2c7-9b07-41b3-91ad-9453dee4dc54",
-  "clientName":"cedrick.lunven@datastax.com",
-  "clientSecret":"aaaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
-}
-```
-
-### 3. Start in Gitpod
-
-**✅ Open Gitpod (with creds copied to clipboard)**
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/Datastax-Academy/workshop-spring-reactive)
-
-When you first launch gitpod, it builds the image.
-![image](doc/img/building-workspace.png?raw=true)
-
-Git pod pulls the image.
-![image](doc/img/pulling-image.png?raw=true)
-
-
-
-**✅ Paste credentials in Gitpod terminal**
-
-Once your Gitpod loads the workspace, you'll be asked to paste your service account credentials in the Gitpod terminal at the bottom of the screen. The [setup.sh](setup.sh) script at the root of the repository is what asks this question.
-
-![image](doc/img/script-copy-creds.png?raw=true)
-
-**✅ Open Swagger UI in browser**
-
-When gitpod finishes building the app, a new tab will open in your browser showing the following.
-
-![image](doc/img/exec-start.png?raw=true)
-
-**🎉 Celebrate!**
-
-You've successfully built the Spring Petclinic Reactive backend application!
-
-![image](doc/img/exec-api-page.png?raw=true)
-
-**✅ Start the Web UI** :
-
-You may have noticed another terminal named `spring-petclinic-angular`. This is where the UI should start.
-
-![image](doc/img/start-ui.png?raw=true)
-
-After answering the question about analytics usage, you should be able to access the UI on a new tab.
-
-
 
 
 
