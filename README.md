@@ -96,7 +96,27 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-
 # Allow execution
 sudo chmod +x /usr/local/bin/docker-compose
 ```
+
+### 1.3 Install curl
+
+[Reference Article](https://help.ubidots.com/en/articles/2165289-learn-how-to-install-run-curl-on-windows-macosx-linux)
+
+![Windows](https://github.com/DataStax-Academy/kubernetes-workshop-online/blob/master/4-materials/images/windows32.png?raw=true) : Already **included** as stated [here](https://www.thewindowsclub.com/how-to-install-curl-on-windows-10)
+
+![osx](https://github.com/DataStax-Academy/kubernetes-workshop-online/blob/master/4-materials/images/mac32.png?raw=true) : Use brew
+
+```
+brew install curl
+```
+
+![linux](https://github.com/DataStax-Academy/kubernetes-workshop-online/blob/master/4-materials/images/linux32.png?raw=true) :Use your package installer like `yum` or apt-get
+
+```
+sudo apt-get install curl
+```
+
 [🏠 Back to Table of Contents](#table-of-content)
+
 
 ## 2. Start the demo
 
@@ -147,22 +167,26 @@ b3a10c48dccc        cassandra:3.11.8                  "docker-entrypoint.s…"  
 
 - You should be able to access the GRAPH QL PORTAL on [http://localhost:8080/playground](http://localhost:8080/playground)
 
+**👁️ Expected output**
 ![image](pics/playground-home.png?raw=true)
 
 
 - You should be able to access the Swagger UI on [http://localhost:8082/swagger-ui/#/](http://localhost:8082/swagger-ui/#/)
 
+**👁️ Expected output**
 ![image](pics/swagger-home.png?raw=true)
 
 [🏠 Back to Table of Contents](#table-of-content)
 
 ## 3. Use CQL API
 
+**✅ Check that everything is OK** :
+
 ```
 docker exec -it `docker ps | grep backend-1 | cut -b 1-12` nodetool status
 ```
-Expected output:
 
+**👁️ Expected output**
 ```bash
 nodetool status
 Datacenter: datacenter1
@@ -176,16 +200,111 @@ UN  172.20.0.2  354.2 KiB  256          34.8%             9dc3b120-19a7-4eda-882
 UN  172.20.0.3  341.41 KiB  256          29.1%             b385cbc3-7d30-46d3-bd14-f1b8ee01044d  rack1
 ```
 
-Get Stargate IP
+**✅ Get Stargate IP** :
 ```
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' stargate
+```
+
+**👁️ Expected output**
+```
+172.20.0.4
+```
+
+**✅ Start CQLSH** :
+
+- Use this IP to connect with a cqlsh. *Note that the stargate image itself does not provide it we use the cqlsh from backend-1 as a sample client.*
+
+```
+docker exec -it `docker ps | grep backend-1 | cut -b 1-12` cqlsh 172.20.0.4
+```
+
+**✅ Create data model** :
+
+```sql
+CREATE KEYSPACE IF NOT EXISTS keyspace1
+  WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '3'}
+  AND durable_writes = true;
+```
+
+- Create schema a UDT and a table
+
+```sql
+use keyspace1;
+
+CREATE TYPE IF NOT EXISTS video_format (
+  width   int,
+  height  int
+);
+
+CREATE TABLE IF NOT EXISTS videos (
+ videoid   uuid,
+ title     text,
+ upload    timestamp,
+ email     text,
+ url       text,
+ tags      set <text>,
+ frames    list<int>,
+ formats   map <text,frozen<video_format>>,
+ PRIMARY KEY (videoid)
+);
+
+describe keyspace;
+```
+
+**✅ Use the data model** :
+
+- Insert value using plain CQL
+
+```sql
+INSERT INTO videos(videoid, email, title, upload, url, tags, frames, formats)
+VALUES(uuid(), 'clu@sample.com', 'sample video', 
+     toTimeStamp(now()), 'http://google.fr',
+     { 'cassandra','accelerate','2020'},
+     [ 1, 2, 3, 4], 
+     { 'mp4':{width:1,height:1},'ogg':{width:1,height:1}});
+```
+
+- Insert Value using JSON
+
+```sql
+INSERT INTO videos JSON '{
+   "videoid":"e466f561-4ea4-4eb7-8dcc-126e0fbfd573",
+     "email":"clunven@sample.com",
+     "title":"A Second videos",
+     "upload":"2020-02-26 15:09:22 +00:00",
+     "url": "http://google.fr",
+     "frames": [1,2,3,4],
+     "tags":   [ "cassandra","accelerate", "2020"],
+     "formats": { 
+        "mp4": {"width":1,"height":1},
+        "ogg": {"width":1,"height":1}
+     }
+}';
+```
+
+- Read values
+
+```sql
+select * from videos;
+```
+
+- Read by id
+```sql
+select * from videos where videoid=e466f561-4ea4-4eb7-8dcc-126e0fbfd573;
+```
+
+- Quit `cqlsh`
+
+```sql
+exit
 ```
 
 [🏠 Back to Table of Contents](#table-of-content)
 
 ## 4. Use REST API (swagger)
 
-- Generate an auth token
+**✅  Generate an auth token** :
+
 
 ```bash
 curl -L -X POST 'http://localhost:8081/v1/auth' \
@@ -196,18 +315,30 @@ curl -L -X POST 'http://localhost:8081/v1/auth' \
 }'
 ```
 
-Expected output 
+Expected output, copy the token in your clip board.
+
 ```
 {"authToken":"74be42ef-3431-4193-b1c1-cd8bd9f48132"}
 ```
 
-- Using Swagger List keyspaces 
+- List keyspaces. 
 
+Locate the `DATA` part of the API and the `listAllKeyspaces` [method on GET](http://localhost:8082/swagger-ui/#/schemas/listAllKeyspaces)
+- Click `Try it out`
+- Provide your token in the field `X-Cassandra-Token`
+- Click on `Execute`
 
 
 [🏠 Back to Table of Contents](#table-of-content)
 
 ## 5. Use Document API (swagger)
+
+Go to [create a namespace](http://localhost:8082/swagger-ui/#/documents/createNamespace)
+
+```json
+{"name":"mynamespace","datacenters":[{ "name": "dc1", "replicas": 3 }]}
+```
+
 
 
 [🏠 Back to Table of Contents](#table-of-content)
