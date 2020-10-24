@@ -305,7 +305,6 @@ exit
 
 **✅  Generate an auth token** :
 
-
 ```bash
 curl -L -X POST 'http://localhost:8081/v1/auth' \
   -H 'Content-Type: application/json' \
@@ -321,13 +320,130 @@ Expected output, copy the token in your clip board.
 {"authToken":"74be42ef-3431-4193-b1c1-cd8bd9f48132"}
 ```
 
-- List keyspaces. 
+**✅ List keyspaces** : 
 
-Locate the `DATA` part of the API and the `listAllKeyspaces` [method on GET](http://localhost:8082/swagger-ui/#/schemas/listAllKeyspaces)
+Locate the `SCHEMA` part of the API
+
+![image](pics/swagger-general.png?raw=true)
+
+ Localt `listAllKeyspaces` [method on GET](http://localhost:8082/swagger-ui/#/schemas/listAllKeyspaces)
+
+![image](pics/swagger-list-keyspace.png?raw=true)
+
 - Click `Try it out`
 - Provide your token in the field `X-Cassandra-Token`
 - Click on `Execute`
 
+**✅ Creating a keyspace2** : 
+
+- [createKeyspace](http://localhost:8082/swagger-ui/#/schemas/createKeyspace)
+- Data
+```json
+{"name": "keyspace2","replicas": 3}
+```
+
+**✅ Creating a Table** : 
+
+- [addTable](http://localhost:8082/swagger-ui/#/schemas/addTable)
+- X-Cassandra-Token: `<your_token>`
+- keyspace: `keyspace2`
+- Data
+```json
+{
+  "name": "users",
+  "columnDefinitions":
+    [
+        {
+        "name": "firstname",
+        "typeDefinition": "text"
+      },
+        {
+        "name": "lastname",
+        "typeDefinition": "text"
+      },
+      {
+        "name": "email",
+        "typeDefinition": "text"
+      },
+        {
+        "name": "favorite color",
+        "typeDefinition": "text"
+      }
+    ],
+  "primaryKey":
+    {
+      "partitionKey": ["firstname"],
+      "clusteringKey": ["lastname"]
+    },
+  "tableOptions":
+    {
+      "defaultTimeToLive": 0,
+      "clusteringExpression":
+        [{ "column": "lastname", "order": "ASC" }]
+    }
+}
+```
+
+Now Locate the `DATA` part of the API
+
+**✅ Insert a row** : 
+
+- [createRow](http://localhost:8082/swagger-ui/#/data/createRow)
+- X-Cassandra-Token: `<your_token>`
+- keyspace: `keyspace2`
+- table: `users`
+- Data
+```json
+{   
+    "firstname": "Mookie",
+    "lastname": "Betts",
+    "email": "mookie.betts@gmail.com",
+    "favorite color": "blue"
+}
+```
+
+```json
+{
+    "firstname": "Janesha",
+    "lastname": "Doesha",
+    "email": "janesha.doesha@gmail.com",
+    "favorite color": "grey"
+}
+```
+
+**✅ Read data** : 
+
+- [getAllRows](http://localhost:8082/swagger-ui/#/data/getAllRows)
+- X-Cassandra-Token: `<your_token>`
+- keyspace: `keyspace2`
+- table: `users`
+
+
+**✅ Update a row** : 
+
+You can do them in curl
+
+```
+export AUTH_TOKEN=<your_token>
+```
+
+```
+curl --location \
+--request PUT 'localhost:8082/v2/keyspaces/users_keyspace/users/Mookie/Betts' \
+--header "X-Cassandra-Token: $AUTH_TOKEN" \
+--header 'Content-Type: application/json' \
+--data '{
+    "email": "mookie.betts.new-email@email.com"
+}'
+```
+
+**✅ Delete a row** : 
+```
+curl --location \
+--request DELETE 'localhost:8082/v2/keyspaces/users_keyspace/users/Mookie' \
+--header "X-Cassandra-Token: $AUTH_TOKEN" \
+--header 'Content-Type: application/json'
+```
 
 [🏠 Back to Table of Contents](#table-of-content)
 
