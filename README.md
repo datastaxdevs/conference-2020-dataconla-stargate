@@ -303,6 +303,9 @@ exit
 
 ## 4. Use REST API (swagger)
 
+This walkthrough has been realized using the [REST API Quick Start](https://stargate.io/docs/stargate/0.1/quickstart/quick_start-rest.html)
+
+
 **✅  Generate an auth token** :
 
 ```bash
@@ -314,15 +317,16 @@ curl -L -X POST 'http://localhost:8081/v1/auth' \
 }'
 ```
 
-Expected output, copy the token in your clip board.
+Copy the token value (here `74be42ef-3431-4193-b1c1-cd8bd9f48132`) in your clipboard.
 
+**👁️ Expected output**
 ```
 {"authToken":"74be42ef-3431-4193-b1c1-cd8bd9f48132"}
 ```
 
 **✅ List keyspaces** : 
 
-Locate the `SCHEMA` part of the API
+Locate the `SCHEMAS` part of the API
 
 ![image](pics/swagger-general.png?raw=true)
 
@@ -447,19 +451,193 @@ curl --location \
 
 [🏠 Back to Table of Contents](#table-of-content)
 
-## 5. Use Document API (swagger)
+## 5. Use Document API (swagger+curl)
 
-Go to [create a namespace](http://localhost:8082/swagger-ui/#/documents/createNamespace)
+This walkthrough has been realized using the [Quick Start](https://stargate.io/docs/stargate/0.1/quickstart/quick_start-document.html)
 
-```json
-{"name":"mynamespace","datacenters":[{ "name": "dc1", "replicas": 3 }]}
+**✅ Generate an auth token** :
+
+Same as Rest API generate a `auth token` 
+```bash
+curl -L -X POST 'http://localhost:8081/v1/auth' \
+  -H 'Content-Type: application/json' \
+  --data-raw '{
+    "username": "cassandra",
+    "password": "cassandra"
+}'
 ```
 
+Save output as an environment variable
 
+```
+export AUTH_TOKEN=5d746e40-97cf-490b-ab0d-68cfbc5d2ef3
+```
+
+**✅ Creating a namespace** :
+
+- Access [createNamespace](http://localhost:8082/swagger-ui/#/documents/createNamespace) in swagger UI
+- Fill with Header `X-Cassandra-Token` with `<your_token>`
+- Use this payload as JSON
+```json
+{ "name": "namespace1", "replicas": 3 }
+```
+
+**✅Checking namespace existence** :
+
+- Access [getAllNamespaces](http://localhost:8082/swagger-ui/#/documents/getAllNamespaces) in swagger UI
+- Fill with Header `X-Cassandra-Token` with `<your_token>`
+- For `raw` you can use either `true` or `false`
+
+**👁️ Expected output**
+```json
+{
+  "data": [
+    { "name": "system_distributed" },
+    { "name": "system" },
+    { "name": "data_endpoint_auth"},
+    { "name": "keyspace1" },
+    { "name": "namespace1"},
+    { "name": "system_schema"},
+    { "name": "keyspace2" },
+    { "name": "stargate_system"},
+    { "name": "system_auth" },
+    { "name": "system_traces"}
+  ]
+}
+```
+
+**✅Create a document** :
+
+```bash
+curl --location \
+--request POST 'localhost:8082/v2/namespaces/namespace1/collections/videos' \
+--header "X-Cassandra-Token: $AUTH_TOKEN" \
+--header 'Content-Type: application/json' \
+--data '{
+   "videoid":"e466f561-4ea4-4eb7-8dcc-126e0fbfd573",
+     "email":"clunven@sample.com",
+     "title":"A Second videos",
+     "upload":"2020-02-26 15:09:22 +00:00",
+     "url": "http://google.fr",
+     "frames": [1,2,3,4],
+     "tags":   [ "cassandra","accelerate", "2020"],
+     "formats": { 
+        "mp4": {"width":1,"height":1},
+        "ogg": {"width":1,"height":1}
+     }
+}'
+```
+
+**👁️ Expected output**:
+```json
+{
+  "documentId":"5d746e40-97cf-490b-ab0d-68cfbc5d2ef3"
+}
+```
+
+**✅Retrieve documents** :
+
+```bash
+curl --location \
+--request GET 'localhost:8082/v2/namespaces/namespace1/collections/videos?page-size=3' \
+--header "X-Cassandra-Token: $AUTH_TOKEN" \
+--header 'Content-Type: application/json'
+```
+
+**👁️ Expected output**:
+```json
+{
+  "data":{
+    "5d746e40-97cf-490b-ab0d-68cfbc5d2ef3":{
+      "email":"clunven@sample.com",
+      "formats":{"mp4":{"height":1,"width":1},"ogg":{"height":1,"width":1}},"frames":[1,2,3,4],
+      "tags":["cassandra","accelerate","2020"],"title":"A Second videos","upload":"2020-02-26 15:09:22 +00:00","url":"http://google.fr","videoid":"e466f561-4ea4-4eb7-8dcc-126e0fbfd573"
+     }
+   }
+}
+```
+
+**✅Retrieve 1 document** :
+
+```bash
+curl -L \
+-X GET 'localhost:8082/v2/namespaces/namespace1/collections/videos/5d746e40-97cf-490b-ab0d-68cfbc5d2ef3' \
+--header "X-Cassandra-Token: $AUTH_TOKEN" \
+--header 'Content-Type: application/json'
+```
+
+**👁️ Expected output**:
+```json
+{
+  "documentId":"5d746e40-97cf-490b-ab0d-68cfbc5d2ef3",
+  "data":{
+     "email":"clunven@sample.com",
+     "formats":{"mp4":{"height":1,"width":1},"ogg":{"height":1,"width":1}},
+     "frames":[1,2,3,4],
+     "tags":["cassandra","accelerate","2020"],
+     "title":"A Second videos",
+     "upload":"2020-02-26 15:09:22 +00:00",
+     "url":"http://google.fr",
+     "videoid":"e466f561-4ea4-4eb7-8dcc-126e0fbfd573"
+   }
+}
+```
+
+**✅Search for document by properties** :
+
+```bash
+curl -L -X  GET 'localhost:8082/v2/namespaces/namespace1/collections/videos?where=\{"email":\{"$eq":"clunven@sample.com"\}\}' \
+--header "X-Cassandra-Token: $AUTH_TOKEN" \
+--header 'Content-Type: application/json'
+```
+
+**👁️ Expected output**:
+```json
+{"data":{
+   "5d746e40-97cf-490b-ab0d-68cfbc5d2ef3":{
+      "email":"clunven@sample.com",
+      "formats":{"mp4":{"height":1,"width":1},"ogg":{"height":1,"width":1}},
+      "frames":[1,2,3,4],
+      "tags":["cassandra","accelerate","2020"],
+      "title":"A Second videos",
+      "upload":"2020-02-26 15:09:22 +00:00",
+      "url":"http://google.fr",
+      "videoid":"e466f561-4ea4-4eb7-8dcc-126e0fbfd573"
+    }
+  }
+}
+```
 
 [🏠 Back to Table of Contents](#table-of-content)
 
 ## 6. Use GraphQL API (portal)
+
+This walkthrough has been realized using the [GraphQL Quick Start](https://stargate.io/docs/stargate/0.1/quickstart/quick_start-graphql.html)
+
+Same as Rest API generate a `auth token` 
+
+**✅Generate Auth token** :
+```bash
+curl -L -X POST 'http://localhost:8081/v1/auth' \
+  -H 'Content-Type: application/json' \
+  --data-raw '{
+    "username": "cassandra",
+    "password": "cassandra"
+}'
+```
+
+Save output as an environment variable
+```
+export AUTH_TOKEN=7c37bda5-7360-4d39-96bc-9765db5773bc
+```
+
+**✅Open GraphQL Playground** :
+
+- You should be able to access the GRAPH QL PORTAL on [http://localhost:8080/playground](http://localhost:8080/playground)
+
+**👁️ Expected output**
+![image](pics/playground-home.png?raw=true)
+
 
 [🏠 Back to Table of Contents](#table-of-content)
 
@@ -508,4 +686,6 @@ Once the database is ready, notice how the status changes from `pending` to `Act
 
 
 
+- There are 2 sets of API (REST)
+- You cannot create a document with Swagger, same with get a document
 
