@@ -5,8 +5,6 @@
 
 ![image](pics/splash.png?raw=true)
 
-- [Slides of the talk are also in this repo](slides/DataconLA 2020 - Stargate Gateway.pdf)
-
 ## Table of content
 
 1. [Prerequisites](#1-prerequisite-install-docker-and-docker-compose)
