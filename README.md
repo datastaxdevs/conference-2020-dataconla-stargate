@@ -13,7 +13,7 @@
 4. [Use REST API](#4-use-rest-api-swagger)
 5. [Use Document API](#5-use-document-api-swagger)
 6. [Use GraphQL API](#6-use-graphql-api-portal)
-7. [Create a Astra Instance](#7-start-the-database)
+7. [Create an Astra Instance](#7-create-your-astra-instance)
 
 ## 1. Prerequisite, Install docker and docker-compose ##
 
@@ -727,15 +727,22 @@ mutation {
 ![image](pics/graphql-insertdata.png?raw=true)
 
 
+**✅ Read data** :
 
-**✅ Populating Table** :
-
-- Use this query
+Stay on the same screen and sinmply update the query with 
 ```
+query oneBook {
+    books (value: {title:"Moby Dick"}) {
+      values {
+        title
+        author
+      }
+    }
+}
 ```
 
 **👁️ Expected output**
-![image](pics/graphql-createtables.png?raw=true)
+![image](pics/graphql-readdata.png?raw=true)
 
 
 [🏠 Back to Table of Contents](#table-of-content)
