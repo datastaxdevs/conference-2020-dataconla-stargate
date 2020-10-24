@@ -482,7 +482,7 @@ export AUTH_TOKEN=5d746e40-97cf-490b-ab0d-68cfbc5d2ef3
 { "name": "namespace1", "replicas": 3 }
 ```
 
-**✅Checking namespace existence** :
+**✅ Checking namespace existence** :
 
 - Access [getAllNamespaces](http://localhost:8082/swagger-ui/#/documents/getAllNamespaces) in swagger UI
 - Fill with Header `X-Cassandra-Token` with `<your_token>`
@@ -506,7 +506,9 @@ export AUTH_TOKEN=5d746e40-97cf-490b-ab0d-68cfbc5d2ef3
 }
 ```
 
-**✅Create a document** :
+**✅ Create a document** :
+
+*Note: operations requiring providing `namespace` and `collections` on the swagger UI seems not functional. We are switching to CURL the API is working, this is a documentation bug that has been notified to the development team.*
 
 ```bash
 curl --location \
@@ -535,7 +537,7 @@ curl --location \
 }
 ```
 
-**✅Retrieve documents** :
+**✅ Retrieve documents** :
 
 ```bash
 curl --location \
@@ -557,7 +559,7 @@ curl --location \
 }
 ```
 
-**✅Retrieve 1 document** :
+**✅ Retrieve 1 document** :
 
 ```bash
 curl -L \
@@ -583,7 +585,7 @@ curl -L \
 }
 ```
 
-**✅Search for document by properties** :
+**✅ Search for document by properties** :
 
 ```bash
 curl -L -X  GET 'localhost:8082/v2/namespaces/namespace1/collections/videos?where=\{"email":\{"$eq":"clunven@sample.com"\}\}' \
@@ -616,7 +618,7 @@ This walkthrough has been realized using the [GraphQL Quick Start](https://starg
 
 Same as Rest API generate a `auth token` 
 
-**✅Generate Auth token** :
+**✅ Generate Auth token** :
 ```bash
 curl -L -X POST 'http://localhost:8081/v1/auth' \
   -H 'Content-Type: application/json' \
@@ -631,18 +633,114 @@ Save output as an environment variable
 export AUTH_TOKEN=7c37bda5-7360-4d39-96bc-9765db5773bc
 ```
 
-**✅Open GraphQL Playground** :
+**✅ Open GraphQL Playground** :
 
 - You should be able to access the GRAPH QL PORTAL on [http://localhost:8080/playground](http://localhost:8080/playground)
+
+You can check on the right of the playground that you have access to documentation and schema which is the neat part about graphQL
 
 **👁️ Expected output**
 ![image](pics/playground-home.png?raw=true)
 
+**✅ Creating a keyspace** :
+
+Before you can start using the GraphQL API, you must first create a Cassandra keyspace and at least one table in your database. If you are connecting to a Cassandra database with existing schema, you can skip this step.
+
+Inside the GraphQL playground, navigate to http://localhost:8080/graphql-schema and create a keyspace by executing the following mutation:
+
+```
+mutation createKeyspaceLibrary {
+  createKeyspace(name:"library", replicas: 1)
+}
+```
+
+Add the auth token to the HTTP Headers box in the lower lefthand corner:
+```
+{
+  "x-cassandra-token":"7c37bda5-7360-4d39-96bc-9765db5773bc"
+}
+```
+
+**👁️ Expected output**
+![image](pics/graphql-createkeyspace.png?raw=true)
+
+**✅ Creating a Table** :
+
+- Use this query
+```
+mutation {
+  books: createTable(
+    keyspaceName:"keyspace3",
+    tableName:"books",
+    partitionKeys: [ # The keys required to access your data
+      { name: "title", type: {basic: TEXT} }
+    ]
+    values: [ # The values associated with the keys
+      { name: "author", type: {basic: TEXT} }
+    ]
+  )
+  authors: createTable(
+    keyspaceName:"keyspace3",
+    tableName:"authors",
+    partitionKeys: [
+      { name: "name", type: {basic: TEXT} }
+    ]
+    clusteringKeys: [ # Secondary key used to access values within the partition
+      { name: "title", type: {basic: TEXT}, order: "ASC" }
+    ]
+  )
+}
+```
+
+**👁️ Expected output**
+![image](pics/graphql-createtables.png?raw=true)
+
+**✅ Populating Table** :
+
+Any of the created APIs can be used to interact with the GraphQL data, to write or read data.
+
+First, let’s navigate to your new keyspace `keyspace3` inside the playground. Change tab to `graphql` and pick url `/graphql/keyspace3`.
+
+- Use this query
+```
+mutation {
+  moby: insertBooks(value: {title:"Moby Dick", author:"Herman Melville"}) {
+    value {
+      title
+    }
+  }
+  catch22: insertBooks(value: {title:"Catch-22", author:"Joseph Heller"}) {
+    value {
+      title
+    }
+  }
+}
+```
+
+- Don't forget to update the header again
+```
+{
+  "x-cassandra-token":"7c37bda5-7360-4d39-96bc-9765db5773bc"
+}
+```
+**👁️ Expected output**
+![image](pics/graphql-insertdata.png?raw=true)
+
+
+
+**✅ Populating Table** :
+
+- Use this query
+```
+```
+
+**👁️ Expected output**
+![image](pics/graphql-createtables.png?raw=true)
+
 
 [🏠 Back to Table of Contents](#table-of-content)
 
-
-## 7. Start the database
+## 7. Create your ASTRA Instance
 
 **✅ Create an free-forever Cassandra database with DataStax Astra**: [click here to get started](https://astra.datastax.com/register?utm_source=github&utm_medium=referral&utm_campaign=spring-petclinic-reactive) 🚀
 
