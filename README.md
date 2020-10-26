@@ -670,7 +670,7 @@ Add the auth token to the HTTP Headers box in the lower lefthand corner:
 ```
 mutation {
   books: createTable(
-    keyspaceName:"keyspace3",
+    keyspaceName:"library",
     tableName:"books",
     partitionKeys: [ # The keys required to access your data
       { name: "title", type: {basic: TEXT} }
@@ -680,7 +680,7 @@ mutation {
     ]
   )
   authors: createTable(
-    keyspaceName:"keyspace3",
+    keyspaceName:"library",
     tableName:"authors",
     partitionKeys: [
       { name: "name", type: {basic: TEXT} }
@@ -699,7 +699,7 @@ mutation {
 
 Any of the created APIs can be used to interact with the GraphQL data, to write or read data.
 
-First, let’s navigate to your new keyspace `keyspace3` inside the playground. Change tab to `graphql` and pick url `/graphql/keyspace3`.
+First, let’s navigate to your new keyspace `library` inside the playground. Change tab to `graphql` and pick url `/graphql/library`.
 
 - Use this query
 ```
@@ -786,11 +786,4 @@ View your database. It may take 2-3 minutes for your database to spin up. You wi
 Once the database is ready, notice how the status changes from `pending` to `Active` and Astra enables the **connect** button.
 
 ![my-pic](https://github.com/datastaxdevs/shared-assets/blob/master/astra/dashboard-withdb-1000.png?raw=true)
-
-
-
-
-
-- There are 2 sets of API (REST)
-- You cannot create a document with Swagger, same with get a document
 
